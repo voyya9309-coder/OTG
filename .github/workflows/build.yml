@@ -1,32 +1,40 @@
-name: Compilar APK
+name: Compilar APK Recupera Movil
 
 on:
   push:
+    branches: [main, master]
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Descargar repositorio
         uses: actions/checkout@v4
 
-      - name: Localizar proyecto (descomprime el ZIP solo dentro del runner)
-        id: prj
-        shell: bash
+      - name: Descomprimir el zip del proyecto
         run: |
           set -e
-          SETTINGS=$(find . -name settings.gradle.kts -not -path './.git/*' -not -path './_proj/*' | head -n 1)
+          ZIP=$(ls -1 *.zip 2>/dev/null | head -n 1 || true)
+          if [ -z "$ZIP" ]; then
+            echo "No hay ningun archivo .zip en la raiz del repositorio"
+            exit 1
+          fi
+          echo "Usando $ZIP"
+          mkdir -p "$RUNNER_TEMP/proj"
+          unzip -q -o "$ZIP" -d "$RUNNER_TEMP/proj"
+          SETTINGS=$(find "$RUNNER_TEMP/proj" -maxdepth 3 -name settings.gradle | head -n 1)
           if [ -z "$SETTINGS" ]; then
-            ZIP=$(find . -maxdepth 3 -iname '*.zip' -not -path './.git/*' | head -n 1)
-            if [ -z "$ZIP" ]; then echo "No hay proyecto ni ZIP en el repositorio"; exit 1; fi
-            mkdir -p _proj
-            unzip -q -o "$ZIP" -d _proj
-            SETTINGS=$(find _proj -name settings.gradle.kts | head -n 1)
+            echo "El zip no contiene settings.gradle"
+            exit 1
           fi
           DIR=$(dirname "$SETTINGS")
-          echo "dir=$DIR" >> "$GITHUB_OUTPUT"
-          echo "Proyecto en: $DIR"
+          echo "Proyecto en $DIR"
+          echo "PROJECT_DIR=$DIR" >> "$GITHUB_ENV"
 
       - name: Instalar Java 17
         uses: actions/setup-java@v4
@@ -34,18 +42,21 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Instalar Gradle 8.7
-        uses: gradle/actions/setup-gradle@v4
+      - name: Preparar Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Preparar Gradle
+        uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: '8.7'
+          gradle-version: '8.5'
 
       - name: Compilar APK
-        working-directory: ${{ steps.prj.outputs.dir }}
+        working-directory: ${{ env.PROJECT_DIR }}
         run: gradle assembleDebug --no-daemon --stacktrace
 
       - name: Subir APK
         uses: actions/upload-artifact@v4
         with:
-          name: OtgRescue-apk
-          path: ${{ steps.prj.outputs.dir }}/app/build/outputs/apk/debug/*.apk
+          name: RecuperaMovil-apk
+          path: ${{ env.PROJECT_DIR }}/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
