@@ -8,6 +8,13 @@ on:
 permissions:
   contents: read
 
+# ATENCION: este archivo contiene tu clave de firma. Usalo SOLO en un repositorio PRIVADO.
+env:
+  KEYSTORE_BASE64: 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
+  KEYSTORE_PASSWORD: qRiqkAWRrsdZAcART9qI
+  KEY_ALIAS: apklis
+  KEY_PASSWORD: qRiqkAWRrsdZAcART9qI
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -56,13 +63,25 @@ jobs:
         with:
           gradle-version: '8.5'
 
+      - name: Preparar firma del APK
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
+            echo "KEYSTORE_PATH=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
+            echo "TAREA=assembleRelease" >> "$GITHUB_ENV"
+            echo "Se firmara con el keystore de los secretos"
+          else
+            echo "TAREA=assembleDebug" >> "$GITHUB_ENV"
+            echo "No hay secreto KEYSTORE_BASE64: se compila APK de depuracion"
+          fi
+
       - name: Compilar APK
         working-directory: ${{ env.PROJECT_DIR }}
-        run: gradle assembleDebug --no-daemon --stacktrace
+        run: gradle ${{ env.TAREA }} --no-daemon --stacktrace
 
       - name: Subir APK
         uses: actions/upload-artifact@v4
         with:
           name: RecuperaMovil-apk
-          path: ${{ env.PROJECT_DIR }}/app/build/outputs/apk/debug/*.apk
+          path: ${{ env.PROJECT_DIR }}/app/build/outputs/apk/*/*.apk
           if-no-files-found: error
